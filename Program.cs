@@ -1,32 +1,95 @@
+using System.Text;
+using Carter;
+using Carter.OpenApi;
 using JwtSample.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+builder.Services.AddSwaggerGen(options =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters()
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = AuthConstants.Issuer,
-        ValidAudience = AuthConstants.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AuthConstants.SigningKey)),
-        ClockSkew = TimeSpan.FromMinutes(5)
-    };
+    options.SwaggerDoc(
+        "v1",
+        new OpenApiInfo
+        {
+            Description = "WineCeller API",
+            Version = "v1",
+            Title = "A wineceller for witcher brews and Yennifers alcohol abuse",
+        }
+    );
+
+    options.DocInclusionPredicate(
+        (s, description) =>
+        {
+            foreach (var metaData in description.ActionDescriptor.EndpointMetadata)
+            {
+                if (metaData is IIncludeOpenApi)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    );
+
+    options.AddSecurityDefinition(
+        JwtBearerDefaults.AuthenticationScheme,
+        new OpenApiSecurityScheme
+        {
+            Description =
+                "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+        }
+    );
+
+    options.AddSecurityRequirement(
+        new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                    },
+                },
+                Array.Empty<string>()
+            },
+        }
+    );
 });
+
+builder
+    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = AuthConstants.Issuer,
+            ValidAudience = AuthConstants.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(AuthConstants.SigningKey)
+            ),
+            ClockSkew = TimeSpan.FromMinutes(5),
+        };
+    });
+
 builder.Services.AddAuthorization();
+builder.Services.AddCarter();
 
 var app = builder.Build();
 
@@ -42,44 +105,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/token", async context =>
-{
-    if (!context.Request.Query.TryGetValue("username", out var userName))
-    {
-        context.Response.StatusCode = 400;
-        context.Response.ContentType = "text/plain";
-        await context.Response.WriteAsync("You must supply a username in the query params", context.RequestAborted);
-
-        return;
-    }
-
-    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AuthConstants.SigningKey));
-    var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-    var claims = new List<Claim>()
-    {
-        new Claim(ClaimTypes.NameIdentifier, userName),
-        //TODO: Add claims to the token here
-    };
-
-    var token = new JwtSecurityToken(issuer: AuthConstants.Issuer, audience: AuthConstants.Audience, claims: claims,
-        expires: DateTime.Now.AddHours(4), signingCredentials: signingCredentials);
-    var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-
-    context.Response.StatusCode = 200;
-    context.Response.ContentType = "application/json";
-    await context.Response.WriteAsJsonAsync(new { token = tokenString });
-});
-app.MapGet("/authorized", async context =>
-{
-    var user = context.User;
-
-    if (user.Identity?.IsAuthenticated ?? false)
-    {
-        context.Response.StatusCode = 200;
-        context.Response.ContentType = "text/plain";
-        await context.Response.WriteAsync($"User is Authenticated with the following username: \"{user.FindFirst(ClaimTypes.NameIdentifier).Value}\"", context.RequestAborted);
-    }
-}).RequireAuthorization();
+app.MapCarter();
 
 app.Run();

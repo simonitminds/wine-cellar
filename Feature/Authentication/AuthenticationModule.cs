@@ -1,0 +1,49 @@
+using System.Security.Claims;
+using Carter;
+using Carter.OpenApi;
+
+public class LoginRequest
+{
+    public string Username { get; set; } = string.Empty;
+}
+
+public class AuthenticationModule : ICarterModule
+{
+    public void AddRoutes(IEndpointRouteBuilder app)
+    {
+        app.MapPost(
+                "/login",
+                (LoginRequest pa, HttpContext donger, HttpResponse response) =>
+                {
+                    return new LoginQuery().Execute(pa.Username);
+                }
+            )
+            .Produces<AuthResponse>(200)
+            .WithTags("Authentication")
+            .WithName("Login")
+            .IncludeInOpenApi();
+
+        app.MapGet(
+                "/protected",
+                (HttpContext context, HttpResponse response) =>
+                {
+                    var user = context.User;
+
+                    if (user.Identity?.IsAuthenticated ?? false)
+                    {
+                        response.StatusCode = 200;
+                        response.ContentType = "text/plain";
+                        return $"User is Authenticated with the following username: \"{user.FindFirst(ClaimTypes.Name).Value}\"";
+                    }
+                    else
+                    {
+                        return "Hello World";
+                    }
+                }
+            )
+            .RequireAuthorization()
+            .WithTags("Authentication")
+            .WithName("Protected")
+            .IncludeInOpenApi();
+    }
+}
