@@ -1,10 +1,10 @@
 using System.Text;
 using Carter;
 using Carter.OpenApi;
-using JwtSample.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using WineCellar.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +19,7 @@ builder.Services.AddSwaggerGen(options =>
         {
             Description = "WineCeller API",
             Version = "v1",
-            Title = "A wineceller for witcher brews and Yennifers alcohol abuse",
+            Title = "A wineceller for witcher brews and Yennifers alcohol abuse"
         }
     );
 
@@ -27,12 +27,8 @@ builder.Services.AddSwaggerGen(options =>
         (s, description) =>
         {
             foreach (var metaData in description.ActionDescriptor.EndpointMetadata)
-            {
                 if (metaData is IIncludeOpenApi)
-                {
                     return true;
-                }
-            }
             return false;
         }
     );
@@ -47,7 +43,7 @@ builder.Services.AddSwaggerGen(options =>
             In = ParameterLocation.Header,
             Type = SecuritySchemeType.Http,
             Scheme = "bearer",
-            BearerFormat = "JWT",
+            BearerFormat = "JWT"
         }
     );
 
@@ -60,11 +56,11 @@ builder.Services.AddSwaggerGen(options =>
                     Reference = new OpenApiReference
                     {
                         Type = ReferenceType.SecurityScheme,
-                        Id = JwtBearerDefaults.AuthenticationScheme,
-                    },
+                        Id = JwtBearerDefaults.AuthenticationScheme
+                    }
                 },
                 Array.Empty<string>()
-            },
+            }
         }
     );
 });
@@ -73,7 +69,7 @@ builder
     .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters()
+        options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
@@ -84,7 +80,7 @@ builder
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(AuthConstants.SigningKey)
             ),
-            ClockSkew = TimeSpan.FromMinutes(5),
+            ClockSkew = TimeSpan.FromMinutes(5)
         };
     });
 

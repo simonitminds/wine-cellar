@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace JwtSample.Migrations
+namespace WineCellar.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

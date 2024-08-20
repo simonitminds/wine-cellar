@@ -2,16 +2,20 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using JwtSample.Auth;
 using Microsoft.IdentityModel.Tokens;
+using WineCellar.Auth;
+using WineCellar.Domain;
+using WineCellar.Persistence;
 
-public class LoginQuery
+namespace WineCellar.Feature.Authentication;
+
+public static class LoginQuery
 {
-    public AuthResponse Execute(string username)
+    public static AuthResponse Execute(string username)
     {
         using var db = new ApplicationDbContext();
 
-        var user = db.Users.Where(u => u.Username == username).FirstOrDefault();
+        var user = db.Users.FirstOrDefault(u => u.Username == username);
         if (user == null)
         {
             user = new User { Username = username };
@@ -24,18 +28,18 @@ public class LoginQuery
         );
         var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-        System.Console.WriteLine(user);
-        var claims = new List<Claim>()
+        Console.WriteLine(user);
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim("UserData", JsonSerializer.Serialize(user)),
+            new(ClaimTypes.Name, username),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new("UserData", JsonSerializer.Serialize(user))
         };
 
         var token = new JwtSecurityToken(
-            issuer: AuthConstants.Issuer,
-            audience: AuthConstants.Audience,
-            claims: claims,
+            AuthConstants.Issuer,
+            AuthConstants.Audience,
+            claims,
             expires: DateTime.Now.AddHours(4),
             signingCredentials: signingCredentials
         );
@@ -45,7 +49,7 @@ public class LoginQuery
         {
             Token = tokenString,
             Username = username,
-            UserId = user.Id,
+            UserId = user.Id
         };
     }
 }

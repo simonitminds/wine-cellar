@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using WineCellar.Domain;
+
+namespace WineCellar.Persistence.EntityTypeConfigurations;
 
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {

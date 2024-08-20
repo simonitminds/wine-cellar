@@ -1,3 +1,5 @@
+namespace WineCellar.Feature.Authentication;
+
 public class AuthResponse
 {
     public string Token { get; set; } = string.Empty;

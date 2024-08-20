@@ -2,7 +2,9 @@ using System.Security.Claims;
 using Carter;
 using Carter.OpenApi;
 
-public class LoginRequest
+namespace WineCellar.Feature.Authentication;
+
+public abstract class LoginRequest
 {
     public string Username { get; set; } = string.Empty;
 }
@@ -13,12 +15,8 @@ public class AuthenticationModule : ICarterModule
     {
         app.MapPost(
                 "/login",
-                (LoginRequest pa, HttpContext donger, HttpResponse response) =>
-                {
-                    return new LoginQuery().Execute(pa.Username);
-                }
-            )
-            .Produces<AuthResponse>(200)
+                (LoginRequest pa, HttpContext _, HttpResponse _) => LoginQuery.Execute(pa.Username))
+            .Produces<AuthResponse>()
             .WithTags("Authentication")
             .WithName("Login")
             .IncludeInOpenApi();
@@ -33,12 +31,11 @@ public class AuthenticationModule : ICarterModule
                     {
                         response.StatusCode = 200;
                         response.ContentType = "text/plain";
-                        return $"User is Authenticated with the following username: \"{user.FindFirst(ClaimTypes.Name).Value}\"";
+                        return
+                            $"User is Authenticated with the following username: \"{user.FindFirst(ClaimTypes.Name)?.Value}\"";
                     }
-                    else
-                    {
-                        return "Hello World";
-                    }
+
+                    return "Hello World";
                 }
             )
             .RequireAuthorization()

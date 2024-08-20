@@ -1,4 +1,4 @@
-﻿namespace JwtSample.Auth;
+﻿namespace WineCellar.Auth;
 
 public static class AuthConstants
 {
