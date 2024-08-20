@@ -34,11 +34,25 @@ Welcome to the most ambitious crossover between monster slaying and wine tasting
 
 ## 🏰 Architecture
 
-This project follows the School of the Wolf architecture:
+Our architecture is as carefully crafted as Vesemir's training regimen, combining the flexibility of Carter modules with the purity of Clean Architecture:
 
-- **Medallion Layer** (API): Vibrates in the presence of monsters and bad requests.
-- **Signs Layer** (Services): Casts a protective barrier around our business logic.
-- **Alchemy Layer** (Data Access): Brews up the perfect mix of data and storage.
+### 🗡️ Clean Architecture: The Witcher's Code
+
+Our project structure follows Clean Architecture principles, as unbreakable as a Witcher's code:
+
+1. **Domain Layer**: The core of our application, like a Witcher's mutations.
+   - Contains all entity models (e.g., `Brew`, `Ingredient`, `CellarShelf`)
+   - Defines interfaces for repositories
+
+2. **Infrastructure Layer**: The tools of our trade, like a Witcher's equipment.
+   - **Persistence**: 
+     - Includes `DbContext` and entity configurations
+     - Implements repository interfaces defined in the domain layer
+   - **External Services**: Integrations with third-party services (e.g., "Continent-wide Brew Catalog API")
+
+3. **Presentation Layer**: The face of our application, like Dandelion's ballads about Witchers.
+   - Carter modules live here, defining API endpoints
+   - Handles request/response models and validations
 
 ## 🧪 Testing
 
