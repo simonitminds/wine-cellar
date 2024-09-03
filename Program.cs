@@ -65,6 +65,14 @@ builder.Services.AddSwaggerGen(options =>
     );
 });
 
+builder.Services.AddCors(options =>{
+    options.AddDefaultPolicy(builder => {
+        builder.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder
     .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -102,5 +110,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapCarter();
-
+app.UseCors();
 app.Run();
