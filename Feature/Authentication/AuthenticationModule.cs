@@ -2,12 +2,14 @@ using System.Security.Claims;
 using Carter;
 using Carter.OpenApi;
 
+
 namespace WineCellar.Feature.Authentication;
 
-public abstract class LoginRequest
+public class LoginRequest
 {
     public string Username { get; set; } = string.Empty;
 }
+
 
 public class AuthenticationModule : ICarterModule
 {
@@ -42,5 +44,22 @@ public class AuthenticationModule : ICarterModule
             .WithTags("Authentication")
             .WithName("Protected")
             .IncludeInOpenApi();
+        
+        app.MapGet(
+            "/me",
+            (HttpContext context, HttpResponse response) => 
+            {
+                return context.User.Claims.FirstOrDefault(x => x.Type == "UserData")?.Value;
+            }
+            )
+            .RequireAuthorization()
+            .WithTags("Authentication")
+            .WithName("Me")
+            .IncludeInOpenApi();
+
+        
+        
+
     }
-}
+
+    }
