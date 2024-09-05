@@ -5,8 +5,6 @@ namespace WineCellar.Domain;
 public class Wine
 {
     public int Id { get; set; }
-
-    [Required]
     public string Name { get; set; } = string.Empty;
     public int Year { get; set; }
     public string Type { get; set; } = string.Empty;
