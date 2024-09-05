@@ -10,7 +10,7 @@ using WineCellar.Persistence;
 namespace WineCellar.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240905085929_WineRelations")]
+    [Migration("20240905110617_WineRelations")]
     partial class WineRelations
     {
         /// <inheritdoc />

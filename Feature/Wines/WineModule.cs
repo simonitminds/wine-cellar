@@ -16,18 +16,19 @@ public class WinesModule : ICarterModule
                 "/wines",
                 (HttpContext context, ApplicationDbContext dbContext) =>
                 {
-                    var user = context.User;
-                    if (user is null)
+                    var name = context.User?.Identity?.Name;
+                    if (name is null)
                     {
                         throw new UnauthorizedAccessException();
                     }
-                    var name = context.User.Identity?.Name;
-                    var wines = dbContext.Users.FirstOrDefault(x => x.Username == name)?.Wines;
+
+                    var wines = dbContext.Users.First(x => x.Username == name).Wines;
 
                     return wines;
                 }
             )
             .Produces<List<Wine>>()
+            .RequireAuthorization()
             .WithTags("Wines")
             .WithName("GetWines")
             .IncludeInOpenApi();
