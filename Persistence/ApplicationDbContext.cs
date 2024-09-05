@@ -15,6 +15,7 @@ public class ApplicationDbContext : DbContext
     public string DbPath { get; }
 
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<Wine> Wines { get; set; } = null!;
 
     // The following configures EF to create a Sqlite database file in the
     // special "local" folder for your platform.

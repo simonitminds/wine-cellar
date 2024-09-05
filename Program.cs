@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WineCellar.Auth;
+using WineCellar.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,7 @@ builder.Services.AddSwaggerGen(options =>
         {
             Description = "WineCeller API",
             Version = "v1",
-            Title = "A wineceller for witcher brews and Yennifers alcohol abuse"
+            Title = "A wineceller for witcher brews and Yennifers alcohol abuse",
         }
     );
 
@@ -43,7 +44,7 @@ builder.Services.AddSwaggerGen(options =>
             In = ParameterLocation.Header,
             Type = SecuritySchemeType.Http,
             Scheme = "bearer",
-            BearerFormat = "JWT"
+            BearerFormat = "JWT",
         }
     );
 
@@ -56,20 +57,20 @@ builder.Services.AddSwaggerGen(options =>
                     Reference = new OpenApiReference
                     {
                         Type = ReferenceType.SecurityScheme,
-                        Id = JwtBearerDefaults.AuthenticationScheme
-                    }
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                    },
                 },
                 Array.Empty<string>()
-            }
+            },
         }
     );
 });
 
-builder.Services.AddCors(options =>{
-    options.AddDefaultPolicy(builder => {
-        builder.AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });
 });
 
@@ -88,12 +89,13 @@ builder
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(AuthConstants.SigningKey)
             ),
-            ClockSkew = TimeSpan.FromMinutes(5)
+            ClockSkew = TimeSpan.FromMinutes(5),
         };
     });
 
 builder.Services.AddAuthorization();
 builder.Services.AddCarter();
+builder.Services.AddDbContext<ApplicationDbContext>();
 
 var app = builder.Build();
 
