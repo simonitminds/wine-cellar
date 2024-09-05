@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace WineCellar.Domain;
 
@@ -11,5 +12,6 @@ public class Wine
     public string Type { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public int UserId { get; set; }
+
     public User User { get; set; } = null!;
 }

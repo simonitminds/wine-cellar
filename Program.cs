@@ -1,7 +1,10 @@
+using System.Security.Cryptography.Xml;
 using System.Text;
+using System.Text.Json.Serialization;
 using Carter;
 using Carter.OpenApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WineCellar.Auth;
@@ -92,6 +95,10 @@ builder
             ClockSkew = TimeSpan.FromMinutes(5),
         };
     });
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 
 builder.Services.AddAuthorization();
 builder.Services.AddCarter();
