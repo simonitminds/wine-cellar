@@ -22,7 +22,7 @@ public class WinesModule : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         app.MapGet(
-                "/wines/",
+                "/wines",
                 (HttpContext context, ApplicationDbContext dbContext) =>
                 {
                     var name = context.User?.Identity?.Name;
@@ -54,13 +54,7 @@ public class WinesModule : ICarterModule
                     {
                         throw new UnauthorizedAccessException();
                     }
-                    var newWine = new Wine
-                    {
-                        Name = wine.Name,
-                        Year = wine.Year,
-                        Type = wine.Type,
-                        Quantity = wine.Quantity,
-                    };
+                    var newWine = new Wine(wine);
                     dbContext.Users.First(x => x.Username == name).Wines.Add(newWine);
                     dbContext.SaveChanges();
 
@@ -72,60 +66,16 @@ public class WinesModule : ICarterModule
             .IncludeInOpenApi()
             .RequireAuthorization();
 
-        app.MapGet(
-                "/wine/",
-                (HttpContext context, ApplicationDbContext dbContext, [FromBody] Wine userWine) =>
-                {
-                    var user = context.User;
-                    if (user is null)
-                    {
-                        throw new UnauthorizedAccessException();
-                    }
-                    var name = context.User.Identity?.Name;
-                    var wine = dbContext
-                        .Users.FirstOrDefault(x => x.Username == name)
-                        ?.Wines.Find(y => y.Id == userWine.Id);
-
-                    return wine;
-                }
-            )
-            .Produces<Wine>()
-            .WithTags("Wines")
-            .WithName("GetWine")
-            .IncludeInOpenApi();
-
-        app.MapGet(
-                "/winesByName/",
-                (HttpContext context, ApplicationDbContext dbContext, string userWines) =>
-                {
-                    var user = context.User;
-                    if (user is null)
-                    {
-                        throw new UnauthorizedAccessException();
-                    }
-                    var name = context.User.Identity?.Name;
-                    var wines = dbContext
-                        .Users.FirstOrDefault(x => x.Username == name)
-                        ?.Wines.Where(y => y.Name.Contains(userWines));
-
-                    return wines;
-                }
-            )
-            .Produces<List<Wine>>()
-            .WithTags("Wines")
-            .WithName("GetWineByName")
-            .IncludeInOpenApi();
-
         app.MapDelete(
-                "/delete/",
-                (HttpContext context, ApplicationDbContext dbContext, [FromBody] Wine userWine) =>
+                "/delete",
+                (HttpContext context, ApplicationDbContext dbContext, int wineId) =>
                 {
-                    var existingWine = dbContext.Wines.Find(userWine.Id);
+                    var existingWine = dbContext.Wines.Find(wineId);
                     if (existingWine is null)
                     {
                         return Results.NotFound("Wine not found");
                     }
-                    dbContext.Remove(userWine);
+                    dbContext.Remove(existingWine);
                     dbContext.SaveChanges();
 
                     return Results.Ok("Wine deleted successfully.");
@@ -137,15 +87,21 @@ public class WinesModule : ICarterModule
             .IncludeInOpenApi();
 
         app.MapPost(
-                "/update/",
-                (HttpContext context, ApplicationDbContext dbContext, [FromBody] Wine userWine) =>
+                "/update",
+                (HttpContext context, ApplicationDbContext dbContext, WineRequest userWine) =>
                 {
-                    var existingWine = dbContext.Wines.Find(userWine.Id);
+                    var existingWine = dbContext.Wines.FirstOrDefault(wine =>
+                        wine.Id == userWine.Id
+                    );
                     if (existingWine is null)
                     {
                         return Results.NotFound("Wine not found");
                     }
-                    dbContext.Update(userWine);
+                    existingWine.Name = userWine.Name;
+                    existingWine.Quantity = userWine.Quantity;
+                    existingWine.Type = userWine.Type;
+                    existingWine.Year = userWine.Year;
+                    dbContext.Update(existingWine);
                     dbContext.SaveChanges();
 
                     return Results.Ok("Wine updated successfully.");
@@ -154,6 +110,21 @@ public class WinesModule : ICarterModule
             .RequireAuthorization()
             .WithTags("Wines")
             .WithName("UpdateWine")
+            .IncludeInOpenApi();
+
+        app.MapGet(
+                "/wine",
+                (HttpContext context, ApplicationDbContext dbContext, int wineId) =>
+                {
+                    var wine = dbContext
+                        .Wines.Where(wine => wine.UserId == context.GetUserId())
+                        .FirstOrDefault(x => x.Id == wineId);
+                    return wine;
+                }
+            )
+            .Produces<Wine>()
+            .WithTags("Wines")
+            .WithName("GetWine")
             .IncludeInOpenApi();
     }
 }
