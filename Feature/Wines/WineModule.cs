@@ -54,13 +54,7 @@ public class WinesModule : ICarterModule
                     {
                         throw new UnauthorizedAccessException();
                     }
-                    var newWine = new Wine
-                    {
-                        Name = wine.Name,
-                        Year = wine.Year,
-                        Type = wine.Type,
-                        Quantity = wine.Quantity,
-                    };
+                    var newWine = new Wine(wine);
                     dbContext.Users.First(x => x.Username == name).Wines.Add(newWine);
                     dbContext.SaveChanges();
 
@@ -71,28 +65,6 @@ public class WinesModule : ICarterModule
             .WithName("AddWine")
             .IncludeInOpenApi()
             .RequireAuthorization();
-
-        app.MapGet(
-                "/winesByName",
-                (HttpContext context, ApplicationDbContext dbContext, string userWines) =>
-                {
-                    var user = context.User;
-                    if (user is null)
-                    {
-                        throw new UnauthorizedAccessException();
-                    }
-                    var name = context.User.Identity?.Name;
-                    var wines = dbContext
-                        .Users.FirstOrDefault(x => x.Username == name)
-                        ?.Wines.Where(y => y.Name.Contains(userWines));
-
-                    return wines;
-                }
-            )
-            .Produces<List<Wine>>()
-            .WithTags("Wines")
-            .WithName("GetWineByName")
-            .IncludeInOpenApi();
 
         app.MapDelete(
                 "/delete",
@@ -144,12 +116,8 @@ public class WinesModule : ICarterModule
                 "/wine",
                 (HttpContext context, ApplicationDbContext dbContext, int wineId) =>
                 {
-                    var userIdString = context
-                        .User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier)
-                        .Value;
-                    var userId = int.Parse(userIdString);
                     var wine = dbContext
-                        .Wines.Where(wine => wine.UserId == userId)
+                        .Wines.Where(wine => wine.UserId == context.GetUserId())
                         .FirstOrDefault(x => x.Id == wineId);
                     return wine;
                 }
