@@ -1,3 +1,7 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using WineCellar.Feature.Storages;
+
 namespace WineCellar.Domain;
 
 public class Storage
@@ -10,4 +14,14 @@ public class Storage
     public int UserId { get; set; }
     public User User { get; set; } = null!;
     public List<Wine> Wines { get; set; } = new();
+
+    public Storage(StorageRequest request)
+    {
+        Name = request.Name;
+        Type = request.Type;
+        Temperature = request.Temperature;
+        Capacity = request.Capacity;
+    }
+
+    public Storage() { }
 }

@@ -125,7 +125,7 @@ namespace WineCellar.Migrations
             modelBuilder.Entity("WineCellar.Domain.Storage", b =>
                 {
                     b.HasOne("WineCellar.Domain.User", "User")
-                        .WithMany()
+                        .WithMany("Storage")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -159,6 +159,8 @@ namespace WineCellar.Migrations
 
             modelBuilder.Entity("WineCellar.Domain.User", b =>
                 {
+                    b.Navigation("Storage");
+
                     b.Navigation("Wines");
                 });
 #pragma warning restore 612, 618
