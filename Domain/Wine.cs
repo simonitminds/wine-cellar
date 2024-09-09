@@ -12,9 +12,14 @@ public class Wine
     public int Year { get; set; }
     public string Type { get; set; } = string.Empty;
     public int Quantity { get; set; }
+    public string Description { get; set; }
     public int UserId { get; set; }
 
     public User User { get; set; } = null!;
+
+    public int StorageId { get; set; }
+
+    public Storage Storage { get; set; } = null!;
 
     public Wine(WineRequest request)
     {
@@ -22,6 +27,7 @@ public class Wine
         Year = request.Year;
         Type = request.Type;
         Quantity = request.Quantity;
+        Description = request.Description;
     }
 
     public Wine() { }

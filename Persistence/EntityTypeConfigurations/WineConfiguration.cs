@@ -16,5 +16,7 @@ public class WineConfiguration : IEntityTypeConfiguration<Wine>
         builder.Property(e => e.Type).HasMaxLength(50);
         builder.HasIndex(e => e.Quantity);
         builder.HasIndex(e => e.UserId);
+        builder.HasIndex(e => e.Description);
+        builder.Property(e => e.Description).HasMaxLength(250);
     }
 }

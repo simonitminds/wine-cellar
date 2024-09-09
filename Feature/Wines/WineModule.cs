@@ -15,6 +15,7 @@ public class WineRequest
     public int Year { get; set; }
     public string Type { get; set; } = string.Empty;
     public int Quantity { get; set; }
+    public string Description { get; set; } = string.Empty;
 }
 
 public class WinesModule : ICarterModule
@@ -101,6 +102,7 @@ public class WinesModule : ICarterModule
                     existingWine.Quantity = userWine.Quantity;
                     existingWine.Type = userWine.Type;
                     existingWine.Year = userWine.Year;
+                    existingWine.Description = userWine.Description;
                     dbContext.Update(existingWine);
                     dbContext.SaveChanges();
 
