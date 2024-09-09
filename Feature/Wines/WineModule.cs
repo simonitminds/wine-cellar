@@ -113,7 +113,7 @@ public class WinesModule : ICarterModule
             .IncludeInOpenApi();
 
         app.MapGet(
-                "/wine",
+                "/wine/{wineId:int}",
                 (HttpContext context, ApplicationDbContext dbContext, int wineId) =>
                 {
                     var wine = dbContext
