@@ -11,7 +11,7 @@ using WineCellar.Persistence;
 namespace WineCellar.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240910084636_StorageRelations")]
+    [Migration("20240910104359_StorageRelations")]
     partial class StorageRelations
     {
         /// <inheritdoc />
@@ -141,8 +141,7 @@ namespace WineCellar.Migrations
                 {
                     b.HasOne("WineCellar.Domain.Storage", "Storage")
                         .WithMany("Wines")
-                        .HasForeignKey("StorageId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("StorageId");
 
                     b.HasOne("WineCellar.Domain.User", "User")
                         .WithMany("Wines")

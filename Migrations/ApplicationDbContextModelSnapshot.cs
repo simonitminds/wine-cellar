@@ -138,8 +138,7 @@ namespace WineCellar.Migrations
                 {
                     b.HasOne("WineCellar.Domain.Storage", "Storage")
                         .WithMany("Wines")
-                        .HasForeignKey("StorageId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("StorageId");
 
                     b.HasOne("WineCellar.Domain.User", "User")
                         .WithMany("Wines")

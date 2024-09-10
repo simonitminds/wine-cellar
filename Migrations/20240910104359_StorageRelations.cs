@@ -10,6 +10,10 @@ namespace WineCellar.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Wines_Storages_StorageId",
+                table: "Wines");
+
             migrationBuilder.AlterColumn<int>(
                 name: "StorageId",
                 table: "Wines",
@@ -17,11 +21,22 @@ namespace WineCellar.Migrations
                 nullable: true,
                 oldClrType: typeof(int),
                 oldType: "INTEGER");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Wines_Storages_StorageId",
+                table: "Wines",
+                column: "StorageId",
+                principalTable: "Storages",
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Wines_Storages_StorageId",
+                table: "Wines");
+
             migrationBuilder.AlterColumn<int>(
                 name: "StorageId",
                 table: "Wines",
@@ -31,6 +46,14 @@ namespace WineCellar.Migrations
                 oldClrType: typeof(int),
                 oldType: "INTEGER",
                 oldNullable: true);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Wines_Storages_StorageId",
+                table: "Wines",
+                column: "StorageId",
+                principalTable: "Storages",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
     }
 }
