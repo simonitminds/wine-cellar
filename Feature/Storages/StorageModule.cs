@@ -56,7 +56,7 @@ public class StorageModule : ICarterModule
             .IncludeInOpenApi();
 
         app.MapDelete(
-                "/storage/delete",
+                "/storage/delete/{storageId:int}",
                 (HttpContext context, ApplicationDbContext dbContext, int storageId) =>
                 {
                     var existingStorage = dbContext.Storages.Find(storageId);

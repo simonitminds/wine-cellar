@@ -64,7 +64,7 @@ public class WinesModule : ICarterModule
             .RequireAuthorization();
 
         app.MapDelete(
-                "/delete",
+                "/delete/{wineId:int}",
                 (HttpContext context, ApplicationDbContext dbContext, int wineId) =>
                 {
                     var existingWine = dbContext.Wines.Find(wineId);
