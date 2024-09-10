@@ -16,6 +16,7 @@ public class WineRequest
     public string Type { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public string Description { get; set; } = string.Empty;
+    public int? StorageId { get; set; }
 }
 
 public class WinesModule : ICarterModule
@@ -50,15 +51,10 @@ public class WinesModule : ICarterModule
                 "/wines/add",
                 (HttpContext context, WineRequest wine, ApplicationDbContext dbContext) =>
                 {
-                    var name = context.User.Identity?.Name;
-                    if (name is null)
-                    {
-                        throw new UnauthorizedAccessException();
-                    }
                     var newWine = new Wine(wine);
-                    dbContext.Users.First(x => x.Username == name).Wines.Add(newWine);
+                    var userId = context.GetUserId();
+                    dbContext.Users.First(x => x.Id == userId).Wines.Add(newWine);
                     dbContext.SaveChanges();
-
                     return newWine;
                 }
             )
@@ -98,15 +94,11 @@ public class WinesModule : ICarterModule
                     {
                         return Results.NotFound("Wine not found");
                     }
-                    existingWine.Name = userWine.Name;
-                    existingWine.Quantity = userWine.Quantity;
-                    existingWine.Type = userWine.Type;
-                    existingWine.Year = userWine.Year;
-                    existingWine.Description = userWine.Description;
-                    dbContext.Update(existingWine);
+
+                    WineMutator.Mutatewine(userWine, existingWine);
                     dbContext.SaveChanges();
 
-                    return Results.Ok("Wine updated successfully.");
+                    return Results.Ok(existingWine);
                 }
             )
             .RequireAuthorization()

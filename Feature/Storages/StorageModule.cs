@@ -25,14 +25,11 @@ public class StorageModule : ICarterModule
                 "/storage/add",
                 (HttpContext context, StorageRequest storage, ApplicationDbContext dbContext) =>
                 {
-                    var name = context.User.Identity?.Name;
-                    if (name is null)
-                    {
-                        throw new UnauthorizedAccessException();
-                    }
                     var newStorage = new Storage(storage);
-                    dbContext.Users.First(x => x.Username == name).Storage.Add(newStorage);
+                    var userId = context.GetUserId();
+                    dbContext.Users.First(x => x.Id == userId).Storage.Add(newStorage);
                     dbContext.SaveChanges();
+
                     return newStorage;
                 }
             )
@@ -45,18 +42,11 @@ public class StorageModule : ICarterModule
                 "/storages",
                 (HttpContext context, ApplicationDbContext dbContext) =>
                 {
-                    var name = context.User?.Identity?.Name;
-                    if (name is null)
-                    {
-                        throw new UnauthorizedAccessException();
-                    }
+                    var storage = dbContext.Storages.Where(storage =>
+                        storage.UserId == context.GetUserId()
+                    );
 
-                    var storages = dbContext
-                        .Users.Include(x => x.Storage)
-                        .First(x => x.Username == name)
-                        .Storage;
-
-                    return storages;
+                    return storage;
                 }
             )
             .Produces<List<Storage>>()
@@ -96,10 +86,8 @@ public class StorageModule : ICarterModule
                     {
                         return Results.NotFound("Storage not found");
                     }
-                    existingStorage.Name = userStorage.Name;
-                    existingStorage.Type = userStorage.Type;
-                    existingStorage.Temperature = userStorage.Temperature;
-                    existingStorage.Capacity = userStorage.Capacity;
+                    StorageMutator.MutateStorage(userStorage, existingStorage);
+
                     dbContext.SaveChanges();
 
                     return Results.Ok(existingStorage);
