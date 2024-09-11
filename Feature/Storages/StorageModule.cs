@@ -114,5 +114,22 @@ public class StorageModule : ICarterModule
             .WithTags("Storage")
             .WithName("GetStorage")
             .IncludeInOpenApi();
+
+        app.MapGet(
+                "/storage/{storageId:int}/wines",
+                (HttpContext context, ApplicationDbContext dbContext, int storageId) =>
+                {
+                    var storage = dbContext
+                        .Storages.Include(storage => storage.Wines)
+                        .Where(storage => storage.UserId == context.GetUserId())
+                        .FirstOrDefault(storage => storage.Id == storageId);
+                    return storage?.Wines;
+                }
+            )
+            .Produces<List<Wine>>()
+            .RequireAuthorization()
+            .WithTags("Storage")
+            .WithName("GetWinesInStorage")
+            .IncludeInOpenApi();
     }
 }
