@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WineCellar.Persistence;
 
@@ -10,57 +11,14 @@ using WineCellar.Persistence;
 namespace WineCellar.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240910104359_StorageRelations")]
+    partial class StorageRelations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
-
-            modelBuilder.Entity("CellarUser", b =>
-                {
-                    b.Property<int>("CellarsId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("UsersId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("CellarsId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("CellarUser");
-                });
-
-            modelBuilder.Entity("WineCellar.Domain.Cellar", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<double>("Temperature")
-                        .HasColumnType("REAL");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Location");
-
-                    b.HasIndex("Name");
-
-                    b.HasIndex("Temperature");
-
-                    b.ToTable("Cellars");
-                });
 
             modelBuilder.Entity("WineCellar.Domain.Storage", b =>
                 {
@@ -69,9 +27,6 @@ namespace WineCellar.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<uint>("Capacity")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("CellarId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -87,18 +42,15 @@ namespace WineCellar.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
-
-                    b.HasIndex("Capacity");
-
-                    b.HasIndex("CellarId");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.HasIndex("Temperature");
-
-                    b.HasIndex("Type");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Storages");
                 });
@@ -133,9 +85,6 @@ namespace WineCellar.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("ExpirationDate")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -144,7 +93,7 @@ namespace WineCellar.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("StorageId")
+                    b.Property<int?>("StorageId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Type")
@@ -152,14 +101,15 @@ namespace WineCellar.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Year")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Description");
-
-                    b.HasIndex("ExpirationDate");
 
                     b.HasIndex("Name");
 
@@ -169,55 +119,50 @@ namespace WineCellar.Migrations
 
                     b.HasIndex("Type");
 
+                    b.HasIndex("UserId");
+
                     b.HasIndex("Year");
 
                     b.ToTable("Wines");
                 });
 
-            modelBuilder.Entity("CellarUser", b =>
-                {
-                    b.HasOne("WineCellar.Domain.Cellar", null)
-                        .WithMany()
-                        .HasForeignKey("CellarsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WineCellar.Domain.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("WineCellar.Domain.Storage", b =>
                 {
-                    b.HasOne("WineCellar.Domain.Cellar", "Cellar")
-                        .WithMany("Storages")
-                        .HasForeignKey("CellarId")
+                    b.HasOne("WineCellar.Domain.User", "User")
+                        .WithMany("Storage")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Cellar");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WineCellar.Domain.Wine", b =>
                 {
                     b.HasOne("WineCellar.Domain.Storage", "Storage")
                         .WithMany("Wines")
-                        .HasForeignKey("StorageId")
+                        .HasForeignKey("StorageId");
+
+                    b.HasOne("WineCellar.Domain.User", "User")
+                        .WithMany("Wines")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Storage");
-                });
 
-            modelBuilder.Entity("WineCellar.Domain.Cellar", b =>
-                {
-                    b.Navigation("Storages");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WineCellar.Domain.Storage", b =>
                 {
+                    b.Navigation("Wines");
+                });
+
+            modelBuilder.Entity("WineCellar.Domain.User", b =>
+                {
+                    b.Navigation("Storage");
+
                     b.Navigation("Wines");
                 });
 #pragma warning restore 612, 618

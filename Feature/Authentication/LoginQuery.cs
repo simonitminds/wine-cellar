@@ -33,7 +33,7 @@ public static class LoginQuery
         {
             new(ClaimTypes.Name, username),
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new("UserData", JsonSerializer.Serialize(user))
+            new("UserData", JsonSerializer.Serialize(user)),
         };
 
         var token = new JwtSecurityToken(
@@ -49,7 +49,7 @@ public static class LoginQuery
         {
             Token = tokenString,
             Username = username,
-            UserId = user.Id
+            UserId = user.Id,
         };
     }
 }

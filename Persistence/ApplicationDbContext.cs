@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using WineCellar.Domain;
 
 namespace WineCellar.Persistence;
@@ -15,12 +16,30 @@ public class ApplicationDbContext : DbContext
     public string DbPath { get; }
 
     public DbSet<User> Users { get; set; } = null!;
+    public DbSet<Wine> Wines { get; set; } = null!;
+    public DbSet<Storage> Storages { get; set; } = null!;
+
+    public DbSet<Cellar> Cellars { get; set; } = null!;
 
     // The following configures EF to create a Sqlite database file in the
     // special "local" folder for your platform.
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    protected override void OnConfiguring(DbContextOptionsBuilder OptionsBuilder)
     {
-        options.UseSqlite($"Data Source={DbPath}");
+        OptionsBuilder.UseSqlite($"Data Source={DbPath}");
+#if DEBUG
+        OptionsBuilder
+            .LogTo(
+                message =>
+                {
+                    if (System.Diagnostics.Debugger.IsAttached)
+                    {
+                        System.Diagnostics.Debug.WriteLine(message);
+                    }
+                },
+                LogLevel.Information
+            )
+            .EnableSensitiveDataLogging();
+#endif
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

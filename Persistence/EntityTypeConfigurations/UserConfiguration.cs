@@ -11,5 +11,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(e => e.Id);
         builder.HasIndex(e => e.Username).IsUnique();
         builder.Property(e => e.Username).HasMaxLength(50);
+        builder.HasMany(e => e.Cellars).WithMany(e => e.Users);
     }
 }
