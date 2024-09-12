@@ -16,7 +16,8 @@ public class WineRequest
     public string Type { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public string Description { get; set; } = string.Empty;
-    public int? StorageId { get; set; }
+    public int? ExpirationTime { get; set; }
+    public int StorageId { get; set; }
 }
 
 public class WinesModule : ICarterModule
@@ -25,7 +26,7 @@ public class WinesModule : ICarterModule
     {
         app.MapGet(
                 "/wines",
-                (HttpContext context, ApplicationDbContext dbContext) =>
+                (HttpContext context, ApplicationDbContext dbContext, int CellarId) =>
                 {
                     var name = context.User?.Identity?.Name;
                     if (name is null)
@@ -34,9 +35,9 @@ public class WinesModule : ICarterModule
                     }
 
                     var wines = dbContext
-                        .Users.Include(x => x.Wines)
-                        .First(x => x.Username == name)
-                        .Wines;
+                        .Cellars.First(x => x.Id == CellarId)
+                        .Storages.SelectMany(storage => storage.Wines)
+                        .ToList();
 
                     return wines;
                 }
@@ -47,21 +48,21 @@ public class WinesModule : ICarterModule
             .WithName("GetWines")
             .IncludeInOpenApi();
 
-        app.MapPost(
-                "/wines/add",
-                (HttpContext context, WineRequest wine, ApplicationDbContext dbContext) =>
-                {
-                    var newWine = new Wine(wine);
-                    var userId = context.GetUserId();
-                    dbContext.Users.First(x => x.Id == userId).Wines.Add(newWine);
-                    dbContext.SaveChanges();
-                    return newWine;
-                }
-            )
-            .WithTags("Wines")
-            .WithName("AddWine")
-            .IncludeInOpenApi()
-            .RequireAuthorization();
+        // app.MapPost(
+        //         "/wines/add",
+        //         (HttpContext context, WineRequest wine, ApplicationDbContext dbContext) =>
+        //         {
+        //             var newWine = new Wine(wine);
+        //             var userId = context.GetUserId();
+        //             dbContext.Users.First(x => x.Id == userId).Wines.Add(newWine);
+        //             dbContext.SaveChanges();
+        //             return newWine;
+        //         }
+        //     )
+        //     .WithTags("Wines")
+        //     .WithName("AddWine")
+        //     .IncludeInOpenApi()
+        //     .RequireAuthorization();
 
         app.MapDelete(
                 "/delete/{wineId:int}",
@@ -106,19 +107,19 @@ public class WinesModule : ICarterModule
             .WithName("UpdateWine")
             .IncludeInOpenApi();
 
-        app.MapGet(
-                "/wine/{wineId:int}",
-                (HttpContext context, ApplicationDbContext dbContext, int wineId) =>
-                {
-                    var wine = dbContext
-                        .Wines.Where(wine => wine.UserId == context.GetUserId())
-                        .FirstOrDefault(x => x.Id == wineId);
-                    return wine;
-                }
-            )
-            .Produces<Wine>()
-            .WithTags("Wines")
-            .WithName("GetWine")
-            .IncludeInOpenApi();
+        // app.MapGet(
+        //         "/wine/{wineId:int}",
+        //         (HttpContext context, ApplicationDbContext dbContext, int wineId) =>
+        //         {
+        //             var wine = dbContext
+        //                 .Wines.Where(wine => wine.UserId == context.GetUserId())
+        //                 .FirstOrDefault(x => x.Id == wineId);
+        //             return wine;
+        //         }
+        //     )
+        //     .Produces<Wine>()
+        //     .WithTags("Wines")
+        //     .WithName("GetWine")
+        //     .IncludeInOpenApi();
     }
 }
