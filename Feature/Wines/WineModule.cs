@@ -16,7 +16,7 @@ public class WineRequest
     public string Type { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public string Description { get; set; } = string.Empty;
-    public int? ExpirationDate { get; set; }
+    public int? ExpirationTime { get; set; }
     public int StorageId { get; set; }
 }
 

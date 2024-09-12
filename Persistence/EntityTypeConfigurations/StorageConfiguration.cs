@@ -13,9 +13,11 @@ public class StorageConfiguration : IEntityTypeConfiguration<Storage>
         builder.Property(e => e.Name).HasMaxLength(50);
         builder.HasIndex(e => e.Type);
         builder.Property(e => e.Type).HasMaxLength(50);
-        builder.HasIndex(e => e.Temperature);
-        builder.HasIndex(e => e.Capacity);
         builder.HasOne(e => e.Cellar).WithMany(e => e.Storages).HasForeignKey(e => e.CellarId);
-        builder.HasMany(e => e.Wines).WithOne(e => e.Storage).HasForeignKey(e => e.StorageId);
+        builder
+            .HasMany(e => e.Wines)
+            .WithOne(e => e.Storage)
+            .HasForeignKey(e => e.StorageId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
