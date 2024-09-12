@@ -9,8 +9,8 @@ public class Storage
     public string Type { get; set; } = string.Empty;
     public double Temperature { get; set; }
     public uint Capacity { get; set; }
-    public int UserId { get; set; }
-    public User User { get; set; } = null!;
+    public int CellarId { get; set; }
+    public Cellar Cellar { get; set; } = null!;
     public List<Wine> Wines { get; set; } = new();
 
     public Storage(StorageRequest request)
@@ -19,6 +19,7 @@ public class Storage
         Type = request.Type;
         Temperature = request.Temperature;
         Capacity = request.Capacity;
+        CellarId = request.CellarId;
     }
 
     public Storage() { }

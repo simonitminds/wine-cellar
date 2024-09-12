@@ -15,6 +15,7 @@ public class StorageRequest
     public string Type { get; set; } = string.Empty;
     public double Temperature { get; set; }
     public uint Capacity { get; set; }
+    public int CellarId { get; set; }
 }
 
 public class StorageModule : ICarterModule
@@ -27,7 +28,7 @@ public class StorageModule : ICarterModule
                 {
                     var newStorage = new Storage(storage);
                     var userId = context.GetUserId();
-                    dbContext.Users.First(x => x.Id == userId).Storage.Add(newStorage);
+                    dbContext.Cellars.First(x => x.Id == storage.CellarId).Storages.Add(newStorage);
                     dbContext.SaveChanges();
 
                     return newStorage;
@@ -42,11 +43,15 @@ public class StorageModule : ICarterModule
                 "/storages",
                 (HttpContext context, ApplicationDbContext dbContext) =>
                 {
-                    var storage = dbContext.Storages.Where(storage =>
-                        storage.UserId == context.GetUserId()
-                    );
+                    var cellars = dbContext
+                        .Cellars.Include(cellar => cellar.Storages)
+                        .Where(cellar =>
+                            cellar.Users.FirstOrDefault(e => e.Id == context.GetUserId()) != null
+                        )
+                        .ToList();
+                    var storages = cellars.SelectMany(cellar => cellar.Storages).ToList();
 
-                    return storage;
+                    return storages;
                 }
             )
             .Produces<List<Storage>>()
@@ -54,6 +59,9 @@ public class StorageModule : ICarterModule
             .WithTags("Storage")
             .WithName("GetStorages")
             .IncludeInOpenApi();
+
+        // Add ep for getting all storages in a cellar
+
 
         app.MapDelete(
                 "/storage/delete/{storageId:int}",
@@ -103,9 +111,9 @@ public class StorageModule : ICarterModule
                 "storage/{storageId:int}",
                 (HttpContext context, ApplicationDbContext dbContext, int storageId) =>
                 {
-                    var storage = dbContext
-                        .Storages.Where(storage => storage.UserId == context.GetUserId())
-                        .FirstOrDefault(x => x.Id == storageId);
+                    var storage = dbContext.Cellars.FirstOrDefault(storage =>
+                        storage.Id == storageId
+                    );
                     return storage;
                 }
             )
@@ -119,9 +127,13 @@ public class StorageModule : ICarterModule
                 "/storage/{storageId:int}/wines",
                 (HttpContext context, ApplicationDbContext dbContext, int storageId) =>
                 {
-                    var storage = dbContext
-                        .Storages.Include(storage => storage.Wines)
-                        .Where(storage => storage.UserId == context.GetUserId())
+                    var cellars = dbContext
+                        .Cellars.Include(storage => storage.Storages)
+                        .ThenInclude(storage => storage.Wines)
+                        .ToList();
+
+                    var storage = cellars
+                        .SelectMany(cellar => cellar.Storages)
                         .FirstOrDefault(storage => storage.Id == storageId);
                     return storage?.Wines;
                 }

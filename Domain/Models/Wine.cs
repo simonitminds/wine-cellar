@@ -12,13 +12,9 @@ public class Wine
     public string Type { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public string Description { get; set; } = string.Empty;
-    public int UserId { get; set; }
-
-    public User User { get; set; } = null!;
-
-    public int? StorageId { get; set; }
-
-    public Storage? Storage { get; set; }
+    public int? ExpirationDate { get; set; }
+    public int StorageId { get; set; }
+    public Storage Storage { get; set; } = null!;
 
     public Wine(WineRequest request)
     {
@@ -28,6 +24,7 @@ public class Wine
         Quantity = request.Quantity;
         Description = request.Description;
         StorageId = request.StorageId;
+        ExpirationDate = request.ExpirationDate;
     }
 
     public Wine() { }
